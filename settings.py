@@ -1,0 +1,2 @@
+ROBLOX_COOKIE = ""
+WEBHOOK_URL = ""
