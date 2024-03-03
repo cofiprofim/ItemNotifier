@@ -24,7 +24,7 @@ except ModuleNotFoundError:
         input("Installing modules denied. Press \"enter\" to leave...")
         exit()
 
-VERSION = "1.0.7"
+VERSION = "1.0.8"
 
 BlackListedItems = ("4381832739", "4924609718", "2493718915", "4381828509", "301820310")
 ItemTypes = {"8": "Hat", "41": "Hair", "42": "Face", "43": "Neck", "44": "Shoulder",
