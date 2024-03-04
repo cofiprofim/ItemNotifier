@@ -82,6 +82,8 @@ def load_files() -> dict:
                     "USER_ID_2"
                 ],
                 "roblox_cookie": "ROBLOX_SECURITY_COKIE",
+                "role_id": "DISCORD_ROLE_ID",
+                "ping_with_role": True,
                 "discord_webhook": "DISCORD_WEBHOOK"
             },
             "other_staff": {
@@ -179,7 +181,7 @@ def send_info(ItemId: str, userId: str) -> None:
     else:
         SaleLocationEmbed = None
     embed = {
-        "content": "<@&1206229607658037248>",
+        "content": f"<@&{data["user_config"]["role_id"]}>" if data["user_config"]["ping_with_role"] else f"{UserDisplayName} just bought a new item",
         "tts": False,
         "embeds": [
             {
