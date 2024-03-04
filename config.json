@@ -1,0 +1,14 @@
+{
+    "user_config": {
+        "users_to_check": [
+            "USER_ID_1",
+            "USER_ID_2"
+        ],
+        "roblox_cookie": "ROBLOX_SECURITY_COKIE",
+        "discord_webhook": "DISCORD_WEBHOOK"
+    },
+    "other_staff": {
+        "auto_update": true,
+        "update_reminder": 1709562018.3200455
+    }
+}
