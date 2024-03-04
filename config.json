@@ -5,6 +5,8 @@
             "USER_ID_2"
         ],
         "roblox_cookie": "ROBLOX_SECURITY_COKIE",
+        "role_id": "DISCORD_ROLE_ID",
+        "ping_with_role": true,
         "discord_webhook": "DISCORD_WEBHOOK"
     },
     "other_staff": {
