@@ -117,6 +117,7 @@ def send_info(ItemId: str, userId: str) -> None:
     if ItemInfo.get("errors", None):
         time.sleep(20)
         send_info(ItemId, userId)
+        return
     UserImage = requests.get(f"https://thumbnails.roblox.com/v1/users/avatar?userIds={userId}&size=48x48&format=Png&isCircular=false").json()["data"][0]["imageUrl"]
     ItemImage = requests.get(url=f"https://thumbnails.roblox.com/v1/assets?assetIds={ItemId}&returnPolicy=PlaceHolder&size=42x42&format=Png&isCircular=false").json()["data"][0]["imageUrl"]
     UserInfo = requests.get(url=f"https://users.roblox.com/v1/users/{userId}").json()
@@ -226,6 +227,7 @@ def send_info(ItemId: str, userId: str) -> None:
         if retry_after:
             time.sleep(int(retry_after))
         send_info(ItemId, userId)
+        return
     else:
         time.sleep(2)
 
@@ -238,6 +240,7 @@ def get_ids(userId: str) -> dict:
             log(f"You got ratelimited! ({response.json()})")
             time.sleep(10)
             get_ids(userId)
+            return
         for Item in Items:
             ItemId = str(Item["assetId"])
             if ItemId not in BlackListedItems:
@@ -277,6 +280,8 @@ def main() -> None:
             ids2 = allIds[userId]
             if ids2 == dict():
                 write_data(allIds, ids1, userId)
+                allIds = get_data()
+                ids2 = allIds[userId]
                 time.sleep(3)
             get_boughts(ids1, ids2, userId)
             write_data(allIds, ids1, userId)
