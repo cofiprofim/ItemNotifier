@@ -2,7 +2,7 @@ import logging; logging.basicConfig(format="[%(asctime)s] %(message)s", level=lo
 import os; clear_console = lambda: os.system("cls" if os.name == "nt" else "clear")
 
 clear_console()
-print(f"\x1b[38;5;2m")
+print(f"\x1b[38;5;2m", end=" ")
 log = (lambda text: logging.info(text))
 try:
     log("Import required modules...")
@@ -30,7 +30,7 @@ except ModuleNotFoundError:
         input("Installing modules denied. Press \"enter\" to leave...")
         exit()
 
-VERSION = "1.0.7"
+VERSION = "1.0.8"
 
 BlackListedItems = ("4381832739", "4924609718", "2493718915", "4381828509", "301820310")
 ItemTypes = {"8": "Hat", "41": "Hair", "42": "Face", "43": "Neck", "44": "Shoulder",
@@ -53,19 +53,16 @@ def check_for_update() -> None:
                       "Uninstalled modules found, do you want to install them?",
                       indicator=" >> ")[1]
         if update == 1:
-            log("Updates was skipped")
             return
         if update == 2:
             otherData["auto_update"] = False
             with open('data.json', "w") as data_file:
                 json.dump(otherData, data_file, indent=4)
-            log("Update was skipped")
             return
         if update == 3:
             otherData["remind_time"] = floor(time.time()) + 30 * 60
             with open('data.json', "w") as data_file:
                 json.dump(otherData, data_file, indent=4)
-            log("Update was skipped")
             return
         with open("main.py", "wb") as main_file:
             main_file.write(res)
@@ -73,10 +70,10 @@ def check_for_update() -> None:
         input()
         exit()
     else:
-        print("No updates found.")
+        log("No updates found.")
 
 def load_files() -> dict:
-    log("Checking for required files.")
+    log("Checking for required files")
     if not os.path.exists("config.json"):
         config_template = {
             "user_config": {
@@ -92,7 +89,6 @@ def load_files() -> dict:
                 "update_reminder": time.time()
             }
         }
-        log("Creating \"config.json\" file")
         with open("config.json", "w") as config_file:
             json.dump(config_template, config_file, indent=4)
         input(f"\x1b[38;5;1mRequired files were created. Fill up \"config.json\" to continue...\n")
@@ -104,8 +100,7 @@ def load_files() -> dict:
     if not userConfig["roblox_cookie"].startswith("_|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items.|_") or not userConfig["discord_webhook"].startswith("https://discord.com/api/webhooks/") or usersToCheck[0] == "USER_ID_1":
         input(f"\x1b[38;5;1mRequired files were created. Fill up \"config.json\" to continue...\n")
         exit()
-    if not os.path.exists("ids.json") or all([userId in json.load(open("ids.json", "r")) for userId in usersToCheck]):
-        log("Creating \"ids.json\" file")
+    if not os.path.exists("ids.json") or not all([userId in json.load(open("ids.json", "r")) for userId in usersToCheck]):
         with open("ids.json", "w") as ids_file:
             json.dump({str(userId): {} for userId in usersToCheck}, ids_file, indent=4)
     return data
@@ -255,42 +250,43 @@ def get_data() -> dict:
         return json.load(file)
 
 def write_data(data: dict, ids1: str, userId: str) -> None:
-    with open('ids.json', 'w') as file:
+    with open('ids.json', 'w') as ids_file:
         data[userId] = ids1
-        json.dump(data, file, indent=4)
+        json.dump(data, ids_file, indent=4)
 
 def get_boughts(ids1: dict, ids2: dict, userId: str) -> int:
-    if ids1 != ids2:
-        for count, idd1 in enumerate(ids1.values(), 1):
-            for id1 in idd1:
-                if idd1.count(id1) <= 1 and id1 != str():
-                    try:
-                        ItemsAdded = abs(ids2[str(count)].index(id1) - idd1.index(id1))
-                    except ValueError:
-                        continue
-                    if ItemsAdded >= 1:
-                        for ItemId in idd1[:ItemsAdded]:
-                            send_info(ItemId, userId)
-                        break
+    if ids1 == ids2:
+        return
+    for count, idd1 in enumerate(ids1.values(), 1):
+        for id1 in idd1:
+            if idd1.count(id1) <= 1 and id1 != str():
+                try:
+                    ItemsAdded = abs(ids2[str(count)].index(id1) - idd1.index(id1))
+                except ValueError:
+                    continue
+                if ItemsAdded >= 1:
+                    for ItemId in idd1[:ItemsAdded]:
+                        send_info(ItemId, userId)
+                    break
 
 def main() -> None:
     while True:
         for userId in data["user_config"]["users_to_check"]:
-            data = get_data()
+            allIds = get_data()
             ids1 = get_ids(userId)
-            ids2 = data[userId]
+            ids2 = allIds[userId]
             if ids2 == dict():
-                write_data(data, ids1, userId)
+                write_data(allIds, ids1, userId)
                 time.sleep(3)
             get_boughts(ids1, ids2, userId)
-            write_data(data, ids1, userId)
+            write_data(allIds, ids1, userId)
             time.sleep(15)
 
 if __name__ == "__main__":
     data = load_files()
     check_for_update()
-    main_thread = threading.Thread(target=main)
+    clear_console()
+    main_thread = threading.Thread(target=main, daemon=True)
     main_thread.start()
     log("Watching... (press \"enter\" to exit)")
     input()
-    os._exit(0)
