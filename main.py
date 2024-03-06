@@ -2,7 +2,7 @@ import logging; logging.basicConfig(format="[%(asctime)s] %(message)s", level=lo
 import os; clear_console = lambda: os.system("cls" if os.name == "nt" else "clear")
 
 clear_console()
-print(f"\x1b[38;5;2m", end=" ")
+print(f"\x1b[38;5;2m")
 log = (lambda text: logging.info(text))
 try:
     log("Import required modules...")
