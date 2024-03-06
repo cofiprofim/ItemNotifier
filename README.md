@@ -17,10 +17,10 @@
 
 ```bash
 # clone the repository
-$ git clone https://github.com/cofiprofim/ItemBoughtNotifier.git
+$ git clone https://github.com/cofiprofim/ItemNotifier.git
 
 # go to bot directory
-$ cd ItemBoughtNotifier
+$ cd ItemNotifier
 
 # install the requirements
 $ python -m pip install -r requirements.txt
