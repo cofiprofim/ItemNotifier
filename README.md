@@ -29,9 +29,11 @@ $ python -m pip install -r requirements.txt
 # Usage
 
 ## Hosting
-To use bot you need host. You can you [pythonanywhere](https://www.pythonanywhere.com/login/) for example.
+
+To use bot you need host so bot can work 24/7. You can use [pythonanywhere](https://www.pythonanywhere.com/login/) for example.
 
 ## Setup config
+
 Before running code you must fill up `config.json`.
 This is a template of config:
 ```json
@@ -53,11 +55,11 @@ This is a template of config:
 }
 ```
 
-## Preview
+# Preview
 
 <img width="40%" height="40%" src="https://github.com/cofiprofim/ItemBoughtNotifier/assets/121694687/8946e121-747d-48d2-9731-6754306cae12"/>
 
-## FAQ
+# FAQ
 
 <details>
 <summary><strong>How to get .ROBLOSECURITY cookie (Click to expand) </strong></summary>
