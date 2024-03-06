@@ -14,6 +14,7 @@
 </p>
 
 # Installation
+
 ```bash
 # clone the repository
 $ git clone https://github.com/cofiprofim/ItemBoughtNotifier.git
@@ -23,17 +24,6 @@ $ cd ItemBoughtNotifier
 
 # install the requirements
 $ python -m pip install -r requirements.txt
-```
-### or
-```bash
-# clone the repository
-$ git clone https://github.com/cofiprofim/ItemBoughtNotifier.git
-
-# go to bot directory
-$ cd ItemBoughtNotifier
-
-# opens main.py file, choose "Yes" to install
-$ python main.py
 ```
 
 # Usage
