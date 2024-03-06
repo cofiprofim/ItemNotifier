@@ -180,8 +180,10 @@ def send_info(ItemId: str, userId: str) -> None:
         }
     else:
         SaleLocationEmbed = None
+    roleId = data["user_config"]["role_id"]
+    pingFlag = data["user_config"]["ping_with_role"]
     embed = {
-        "content": f"<@&{data["user_config"]["role_id"]}>" if data["user_config"]["ping_with_role"] else f"{UserDisplayName} just bought a new item",
+        "content": f"<@&{roleId}>" if pingFlag else "",
         "tts": False,
         "embeds": [
             {
@@ -237,12 +239,14 @@ def get_ids(userId: str) -> dict:
     arr = {'1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': [], '8': [], '9': [], '10': [], '11': [], '12': [], '13': [], '14': [], '15': []}
     for index, value in enumerate(arr.values()):
         response = requests.get(f"https://inventory.roblox.com/v2/users/{userId}/inventory/{list(ItemTypes.keys())[index]}?limit=10&sortOrder=Desc")
-        Items = response.json().get("data", None)
+        try:
+            Items = response.json().get("data", None)
+        except json.JSONDecodeError:
+            print(response)
+            Items = response
         if not Items:
-            log(f"You got ratelimited! ({response.json()})")
             time.sleep(10)
-            get_ids(userId)
-            return
+            return get_ids(userId)
         for Item in Items:
             ItemId = str(Item["assetId"])
             if ItemId not in BlackListedItems:
