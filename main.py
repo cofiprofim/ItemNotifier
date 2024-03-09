@@ -42,12 +42,14 @@ def check_for_update() -> None:
     otherData = data["other_staff"]
     if not otherData["auto_update"] or otherData.get("update_reminder", 0) > time.time():
         return
-    res = requests.get("https://raw.githubusercontent.com/cofiprofim/ItemBoughtNotifier/main/main.py").content
+    res = requests.get("https://github.com/cofiprofim/ItemNotifier/edit/main/main.py").content
     try:
         version = res.decode().strip().split("VERSION = \"")[1].split("\"")[0]
     except IndexError:
         log("Could not get a valid version")
         return
+    print(version, VERSION)
+    input()
     if version != VERSION:
         update = pick(["Yes", "No", "No, dont remind again", "No, dont remind me in 30 minutes"],
                       "Uninstalled modules found, do you want to install them?",
@@ -184,7 +186,6 @@ def send_info(ItemId: str, userId: str) -> None:
     pingFlag = data["user_config"]["ping_with_role"]
     embed = {
         "content": f"<@&{roleId}>" if pingFlag else "",
-        "tts": False,
         "embeds": [
             {
                 "id": 652627557,
@@ -226,7 +227,6 @@ def send_info(ItemId: str, userId: str) -> None:
         "actions": {},
         }
     response = requests.post(userConfig["discord_webhook"], json=embed)
-    print(response.headers)
     if response.status_code == 429:
         retry_after = response.headers.get("Retry-After", None)
         if retry_after:
