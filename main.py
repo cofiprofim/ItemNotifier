@@ -2,7 +2,7 @@ import logging; logging.basicConfig(format="[%(asctime)s] %(message)s", level=lo
 import os; clear_console = lambda: os.system("cls" if os.name == "nt" else "clear")
 
 clear_console()
-print(f"\x1b[38;5;2m")
+print(f"\x1b[38;5;2m", end=" ")
 log = (lambda text: logging.info(text))
 try:
     log("Import required modules...")
@@ -18,7 +18,7 @@ except ModuleNotFoundError:
         install = pick(["Yes", "No"], "Uninstalled modules found, do you want to install them?", indicator=" >> ")[1] == 0
     except ModuleNotFoundError:
         install = input("Uninstalled modules found, do you want to install them? Y/n: ").lower() == "y"
-    
+
     if install:
         log("Installing required modules...")
         os.system("python -m pip install --upgrade pip")
@@ -30,9 +30,9 @@ except ModuleNotFoundError:
         input("Installing modules denied. Press \"enter\" to leave...")
         exit()
 
-VERSION = "1.0.7"
+VERSION = "1.0.8"
 
-BlackListedItems = ("4381832739", "4924609718", "2493718915", "4381828509", "301820310")
+BlackListedItems = ("4381832739", "4924609718", "2493718915", "4381828509", "301820310", "4637254498")
 ItemTypes = {"8": "Hat", "41": "Hair", "42": "Face", "43": "Neck", "44": "Shoulder",
              "45": "Front", "46": "Back", "47": "Waist", "64": "t-Shirt", "65": "Shirt",
              "66": "Pants", "67": "Jacket", "68": "Sweater", "69": "Shorts", "72": "Skirt"}
@@ -40,7 +40,7 @@ ItemTypes = {"8": "Hat", "41": "Hair", "42": "Face", "43": "Neck", "44": "Should
 def check_for_update() -> None:
     log("Checking for an updates")
     otherData = data["other_staff"]
-    if not otherData["auto_update"] or otherData.get("remind_time", 0) > time.time():
+    if not otherData["auto_update"] or otherData.get("update_reminder", 0) > time.time():
         return
     res = requests.get("https://raw.githubusercontent.com/cofiprofim/ItemBoughtNotifier/main/main.py").content
     try:
@@ -55,14 +55,14 @@ def check_for_update() -> None:
         if update == 1:
             return
         if update == 2:
-            otherData["auto_update"] = False
-            with open('data.json', "w") as data_file:
-                json.dump(otherData, data_file, indent=4)
+            data["other_staff"]["auto_update"] = False
+            with open('config.json', "w") as data_file:
+                json.dump(data, data_file, indent=4)
             return
         if update == 3:
-            otherData["remind_time"] = floor(time.time()) + 30 * 60
-            with open('data.json', "w") as data_file:
-                json.dump(otherData, data_file, indent=4)
+            data["other_staff"]["update_reminder"] = floor(time.time()) + 30 * 60
+            with open('config.json', "w") as data_file:
+                json.dump(data, data_file, indent=4)
             return
         with open("main.py", "wb") as main_file:
             main_file.write(res)
@@ -111,7 +111,7 @@ def get_csrf_token(roblox_cookie: str) -> str:
     session = requests.Session()
     session.cookies['.ROBLOSECURITY'] = roblox_cookie
     req = session.post("https://auth.roblox.com/v2/login")
-    return req.headers["x-csrf-token"]
+    return req.headers["x-csrf-token"], session
 
 def send_info(ItemId: str, userId: str) -> None:
     userConfig = data["user_config"]
@@ -128,8 +128,8 @@ def send_info(ItemId: str, userId: str) -> None:
     ItemName = ItemInfo["Name"]
     ItemId = ItemInfo["AssetId"]
     if not ItemInfo["PriceInRobux"] and ItemInfo["IsLimitedUnique"] or ItemInfo["IsLimited"]:
-        csrf_token = get_csrf_token(userConfig["roblox_cookie"])
-        ItemInfo2 = requests.post("https://catalog.roblox.com/v1/catalog/items/details", headers={"x-csrf-token": csrf_token}, json={"items": [{"itemType": "1", "id": ItemId}]}).json()["data"][0]
+        csrf_token, session = get_csrf_token(userConfig["roblox_cookie"])
+        ItemInfo2 = session.post("https://catalog.roblox.com/v1/catalog/items/details", headers={"x-csrf-token": csrf_token}, json={"items": [{"itemType": "1", "id": ItemId}]}).json()["data"][0]
         ItemPrice = ItemInfo2["lowestResalePrice"]
         PriceNameEmbed = "LowestPrice"
     else:
@@ -226,6 +226,7 @@ def send_info(ItemId: str, userId: str) -> None:
         "actions": {},
         }
     response = requests.post(userConfig["discord_webhook"], json=embed)
+    print(response.headers)
     if response.status_code == 429:
         retry_after = response.headers.get("Retry-After", None)
         if retry_after:
@@ -239,11 +240,9 @@ def get_ids(userId: str) -> dict:
     arr = {'1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': [], '8': [], '9': [], '10': [], '11': [], '12': [], '13': [], '14': [], '15': []}
     for index, value in enumerate(arr.values()):
         response = requests.get(f"https://inventory.roblox.com/v2/users/{userId}/inventory/{list(ItemTypes.keys())[index]}?limit=10&sortOrder=Desc")
-        try:
-            Items = response.json().get("data", None)
-        except json.JSONDecodeError:
-            print(response)
-            Items = response
+        if response.status_code  == 502:
+            return get_ids(userId)
+        Items = response.json().get("data", None)
         if not Items:
             time.sleep(10)
             return get_ids(userId)
