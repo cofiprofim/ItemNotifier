@@ -40,16 +40,14 @@ ItemTypes = {"8": "Hat", "41": "Hair", "42": "Face", "43": "Neck", "44": "Should
 def check_for_update() -> None:
     log("Checking for an updates")
     otherData = data["other_staff"]
-    if not otherData["auto_update"] or otherData.get("update_reminder", 0) > time.time():
+    if not otherData["auto_update"] or otherData.get("remind_time", 0) > time.time():
         return
-    res = requests.get("https://github.com/cofiprofim/ItemNotifier/edit/main/main.py").content
+    res = requests.get("https://raw.githubusercontent.com/cofiprofim/ItemNotifier/main/main.py").content
     try:
         version = res.decode().strip().split("VERSION = \"")[1].split("\"")[0]
     except IndexError:
         log("Could not get a valid version")
         return
-    print(version, VERSION)
-    input()
     if version != VERSION:
         update = pick(["Yes", "No", "No, dont remind again", "No, dont remind me in 30 minutes"],
                       "Uninstalled modules found, do you want to install them?",
@@ -62,7 +60,7 @@ def check_for_update() -> None:
                 json.dump(data, data_file, indent=4)
             return
         if update == 3:
-            data["other_staff"]["update_reminder"] = floor(time.time()) + 30 * 60
+            data["other_staff"]["remind_time"] = floor(time.time()) + 30 * 60
             with open('config.json', "w") as data_file:
                 json.dump(data, data_file, indent=4)
             return
@@ -90,7 +88,7 @@ def load_files() -> dict:
             },
             "other_staff": {
                 "auto_update": True,
-                "update_reminder": time.time()
+                "remind_time": time.time()
             }
         }
         with open("config.json", "w") as config_file:
@@ -186,6 +184,7 @@ def send_info(ItemId: str, userId: str) -> None:
     pingFlag = data["user_config"]["ping_with_role"]
     embed = {
         "content": f"<@&{roleId}>" if pingFlag else "",
+        "tts": False,
         "embeds": [
             {
                 "id": 652627557,
